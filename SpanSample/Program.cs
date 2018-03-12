@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
-namespace ConsoleApp3
+namespace SpanSample
 {
     public class Program
     {

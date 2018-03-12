@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace ConsoleApp3
+namespace SpanSample
 {
     public struct Enumerable : IEnumerable<Foo>
     {

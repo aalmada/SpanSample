@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ConsoleApp3
+namespace SpanSample
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct Foo

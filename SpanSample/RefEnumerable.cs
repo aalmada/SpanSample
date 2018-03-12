@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace ConsoleApp3
+namespace SpanSample
 {
     struct RefEnumerable
     {
@@ -18,7 +18,7 @@ namespace ConsoleApp3
 
         public Enumerator GetEnumerator() => new Enumerator(this);
 
-        public ref struct Enumerator
+        public unsafe ref struct Enumerator
         {
             static readonly int ItemSize = Marshal.SizeOf<Foo>();
 

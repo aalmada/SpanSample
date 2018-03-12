@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace ConsoleApp3
+namespace SpanSample
 {
     [MemoryDiagnoser]
     public class EnumerationBenchmarks
@@ -32,7 +32,7 @@ namespace ConsoleApp3
         }
 
         [Benchmark]
-        public long Sum()
+        public long Sum_Raw()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -54,14 +54,13 @@ namespace ConsoleApp3
         }
 
         [Benchmark(Baseline = true)]
-        public unsafe long RawEnumerationStack()
+        public long Sum_RawStack()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
             var itemSize = Marshal.SizeOf<Foo>();
 
-            var stack = stackalloc Foo[itemsBufferCount]; // alloc items buffer
-            var buffer = new Span<Foo>(stack, itemsBufferCount);
+            Span<Foo> buffer = stackalloc Foo[itemsBufferCount]; // alloc items buffer
             var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
 
             var bytesRead = stream.Read(rawBuffer);
@@ -77,7 +76,7 @@ namespace ConsoleApp3
         }
 
         [Benchmark]
-        public long RefEnumerable()
+        public long Sum_RefEnumerable()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -88,7 +87,7 @@ namespace ConsoleApp3
         }
 
         [Benchmark]
-        public long Enumerable()
+        public long Sum_Enumerable()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
