@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace SpanSample
 {
@@ -25,7 +24,7 @@ namespace SpanSample
 
         public struct Enumerator : IEnumerator<Foo>
         {
-            static readonly int ItemSize = Marshal.SizeOf<Foo>();
+            static readonly int ItemSize = Unsafe.SizeOf<Foo>();
 
             readonly Stream stream;
             readonly Memory<Foo> buffer;

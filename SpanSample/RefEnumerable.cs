@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace SpanSample
 {
@@ -20,7 +19,7 @@ namespace SpanSample
 
         public unsafe ref struct Enumerator
         {
-            static readonly int ItemSize = Marshal.SizeOf<Foo>();
+            static readonly int ItemSize = Unsafe.SizeOf<Foo>();
 
             readonly Stream stream;
             readonly Span<Foo> buffer;

@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace SpanSample
 {
@@ -36,7 +36,7 @@ namespace SpanSample
         {
             stream.Seek(0, SeekOrigin.Begin);
 
-            var itemSize = Marshal.SizeOf<Foo>();
+            var itemSize = Unsafe.SizeOf<Foo>();
 
             Span<Foo> buffer = new Foo[itemsBufferCount]; // alloc items buffer
             var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
@@ -58,7 +58,7 @@ namespace SpanSample
         {
             stream.Seek(0, SeekOrigin.Begin);
 
-            var itemSize = Marshal.SizeOf<Foo>();
+            var itemSize = Unsafe.SizeOf<Foo>();
 
             Span<Foo> buffer = new Foo[itemsBufferCount]; // alloc items buffer
             var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
@@ -81,7 +81,7 @@ namespace SpanSample
         {
             stream.Seek(0, SeekOrigin.Begin);
 
-            var itemSize = Marshal.SizeOf<Foo>();
+            var itemSize = Unsafe.SizeOf<Foo>();
 
             Span<Foo> buffer = new Foo[itemsBufferCount]; // alloc items buffer
             var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
@@ -104,7 +104,7 @@ namespace SpanSample
         {
             stream.Seek(0, SeekOrigin.Begin);
 
-            var itemSize = Marshal.SizeOf<Foo>();
+            var itemSize = Unsafe.SizeOf<Foo>();
 
             Span<Foo> buffer = stackalloc Foo[itemsBufferCount]; // alloc items buffer
             var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
