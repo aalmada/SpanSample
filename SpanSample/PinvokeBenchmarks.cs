@@ -120,8 +120,7 @@ namespace SpanSample
             {
                 buffer = Marshal.AllocHGlobal(size);
                 GC.AddMemoryPressure(size);
-                ReadOnlySpan<int> span = new ReadOnlySpan<int>(buffer.ToPointer(), BufferSize);
-                return Sum(span);
+                return Sum(new ReadOnlySpan<int>(buffer.ToPointer(), BufferSize));
             }
             finally
             {
