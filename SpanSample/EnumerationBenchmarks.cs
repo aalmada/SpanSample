@@ -8,15 +8,21 @@ namespace SpanSample
     [MemoryDiagnoser]
     public class EnumerationBenchmarks
     {
-        const int itemsBufferCount = 100;
         Stream stream;
+
+        [Params(1_000_000)]
+        public int ItemsCount { get; set; }
+
+        [Params(100)]
+        public int ItemsBufferCount { get; set; }
+
 
         [GlobalSetup]
         public void Setup()
         {
             stream = new MemoryStream();
             var buffer = new byte[8];
-            for (var counter = 0; counter < 10_000_000; counter++)
+            for (var counter = 0; counter < ItemsCount; counter++)
             {
                 BitConverter.TryWriteBytes(buffer, (long)counter);
                 stream.Write(buffer);
@@ -38,7 +44,7 @@ namespace SpanSample
 
             var itemSize = Unsafe.SizeOf<Foo>();
 
-            Span<Foo> buffer = new Foo[itemsBufferCount]; // alloc items buffer
+            Span<Foo> buffer = new Foo[ItemsBufferCount]; // alloc items buffer
             var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
 
             var bytesRead = stream.Read(rawBuffer);
@@ -60,7 +66,7 @@ namespace SpanSample
 
             var itemSize = Unsafe.SizeOf<Foo>();
 
-            Span<Foo> buffer = new Foo[itemsBufferCount]; // alloc items buffer
+            Span<Foo> buffer = new Foo[ItemsBufferCount]; // alloc items buffer
             var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
 
             var bytesRead = stream.Read(rawBuffer);
@@ -83,7 +89,7 @@ namespace SpanSample
 
             var itemSize = Unsafe.SizeOf<Foo>();
 
-            Span<Foo> buffer = new Foo[itemsBufferCount]; // alloc items buffer
+            Span<Foo> buffer = new Foo[ItemsBufferCount]; // alloc items buffer
             var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
 
             var bytesRead = stream.Read(rawBuffer);
@@ -106,7 +112,7 @@ namespace SpanSample
 
             var itemSize = Unsafe.SizeOf<Foo>();
 
-            Span<Foo> buffer = stackalloc Foo[itemsBufferCount]; // alloc items buffer
+            Span<Foo> buffer = stackalloc Foo[ItemsBufferCount]; // alloc items buffer
             var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
 
             var bytesRead = stream.Read(rawBuffer);
@@ -128,7 +134,7 @@ namespace SpanSample
             stream.Seek(0, SeekOrigin.Begin);
 
             var sum = 0L;
-            foreach (var foo in new RefEnumerable(stream, itemsBufferCount))
+            foreach (var foo in new RefEnumerable(stream, ItemsBufferCount))
                 sum += foo.Integer;
             return sum;
         }
@@ -139,8 +145,17 @@ namespace SpanSample
             stream.Seek(0, SeekOrigin.Begin);
 
             var sum = 0L;
-            foreach (var foo in new Enumerable(stream, itemsBufferCount))
+            foreach (var foo in new Enumerable(stream, ItemsBufferCount))
                 sum += foo.Integer;
+            return sum;
+        }
+
+        [Benchmark]
+        public long Sum_NativeEnumerable()
+        {
+            var sum = 0L;
+            foreach (var foo in new NativeEnumerable(ItemsCount, ItemsBufferCount))
+                sum += foo;
             return sum;
         }
     }

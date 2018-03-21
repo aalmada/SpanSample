@@ -1,47 +1,47 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace SpanSample
 {
-    public struct Enumerable : IEnumerable<Foo>
+    public sealed class NativeEnumerable : 
+        IEnumerable<int>
     {
-        readonly Stream stream;
+        readonly int itemsCount;
         readonly int itemsBufferCount;
 
-        public Enumerable(Stream stream, int itemsBufferCount)
+        public NativeEnumerable(int itemsCount, int itemsBufferCount)
         {
-            this.stream = stream;
+            this.itemsCount = itemsCount;
             this.itemsBufferCount = itemsBufferCount;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerator<Foo> GetEnumerator() => new Enumerator(this);
+        public IEnumerator<int> GetEnumerator() => new Enumerator(this);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        struct Enumerator : IEnumerator<Foo>
+        struct Enumerator : IEnumerator<int>
         {
-            static readonly int ItemSize = Unsafe.SizeOf<Foo>();
-
-            readonly Stream stream;
-            readonly Memory<Foo> buffer;
+            readonly NativeStreamHandle stream;
+            readonly NativeOwnedMemory<int> buffer;
             bool lastBuffer;
             long loadedItems;
             int currentItem;
 
-            public Enumerator(Enumerable enumerable)
+            public Enumerator(NativeEnumerable enumerable)
             {
-                stream = enumerable.stream;
-                buffer = new Foo[enumerable.itemsBufferCount]; // alloc items buffer
+                stream = new NativeStreamHandle((UIntPtr)enumerable.itemsCount);
+                buffer = new NativeOwnedMemory<int>(enumerable.itemsBufferCount); // alloc items buffer
                 lastBuffer = false;
                 loadedItems = 0;
                 currentItem = -1;
             }
 
-            public Foo Current
+            public int Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => buffer.Span[currentItem];
@@ -57,19 +57,18 @@ namespace SpanSample
                     return false;
 
                 // get next buffer
-                var rawBuffer = buffer.Span.NonPortableCast<Foo, Byte>();
-                var bytesRead = stream.Read(rawBuffer);
-                lastBuffer = bytesRead < rawBuffer.Length;
+                this.loadedItems = (int)Native.StreamRead(this.stream, ref MemoryMarshal.GetReference(this.buffer.Span), (UIntPtr)this.buffer.Length);
+                lastBuffer = loadedItems < buffer.Length;
                 currentItem = 0;
-                loadedItems = bytesRead / ItemSize;
                 return loadedItems != 0;
             }
 
-            public void Reset() => throw new NotImplementedException();
+            public void Reset() => Native.StreamReset(this.stream);
 
             public void Dispose()
             {
-                // nothing to do
+                this.stream.Dispose();
+                this.buffer.Dispose();
             }
         }
     }
