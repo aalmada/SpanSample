@@ -10,6 +10,7 @@ namespace SpanSample
             var switcher = new BenchmarkSwitcher(new[] {
                 typeof(EnumerationBenchmarks),
                 typeof(PinvokeBenchmarks),
+                typeof(StringBenchmarks),
             });
             switcher.Run(args);
         }
