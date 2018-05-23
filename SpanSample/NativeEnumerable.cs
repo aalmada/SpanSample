@@ -27,7 +27,7 @@ namespace SpanSample
         struct Enumerator : IEnumerator<int>
         {
             readonly NativeStreamHandle stream;
-            readonly NativeOwnedMemory<int> buffer;
+            readonly NativeMemoryManager<int> buffer;
             bool lastBuffer;
             long loadedItems;
             int currentItem;
@@ -35,7 +35,7 @@ namespace SpanSample
             public Enumerator(NativeEnumerable enumerable)
             {
                 stream = new NativeStreamHandle((UIntPtr)enumerable.itemsCount);
-                buffer = new NativeOwnedMemory<int>(enumerable.itemsBufferCount); // alloc items buffer
+                buffer = new NativeMemoryManager<int>(enumerable.itemsBufferCount); // alloc items buffer
                 lastBuffer = false;
                 loadedItems = 0;
                 currentItem = -1;
@@ -44,7 +44,7 @@ namespace SpanSample
             public int Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => buffer.Span[currentItem];
+                get => buffer.Memory.Span[currentItem];
             }
 
             object IEnumerator.Current => Current;
@@ -57,7 +57,7 @@ namespace SpanSample
                     return false;
 
                 // get next buffer
-                this.loadedItems = (int)Native.StreamRead(this.stream, ref MemoryMarshal.GetReference(this.buffer.Span), (UIntPtr)this.buffer.Length);
+                this.loadedItems = (int)Native.StreamRead(this.stream, ref MemoryMarshal.GetReference(this.buffer.Memory.Span), (UIntPtr)this.buffer.Length);
                 lastBuffer = loadedItems < buffer.Length;
                 currentItem = 0;
                 return loadedItems != 0;
@@ -68,7 +68,7 @@ namespace SpanSample
             public void Dispose()
             {
                 this.stream.Dispose();
-                this.buffer.Dispose();
+                ((IDisposable)this.buffer).Dispose(); // ???
             }
         }
     }

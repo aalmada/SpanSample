@@ -14,7 +14,7 @@ public:
 		_buffer(size),
 		_position(0)
 	{
-		std::iota(_buffer.begin(), _buffer.end(), 0); 
+		std::iota(_buffer.begin(), _buffer.end(), 42); 
 	}
 
 	size_t GetSize() const

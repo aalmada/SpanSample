@@ -31,7 +31,7 @@ namespace SpanSample
         [Benchmark(Baseline = true)]
         public ReadOnlySpan<char> Slice()
         {
-            return this.String.AsReadOnlySpan(this.Start, this.Length);
+            return this.String.AsSpan(this.Start, this.Length);
         }
     }
 }

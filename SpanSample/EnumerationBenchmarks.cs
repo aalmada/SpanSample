@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace SpanSample
 {
@@ -38,14 +39,14 @@ namespace SpanSample
         }
 
         [Benchmark]
-        public long Sum_RawForeach()
+        public long RawForeach()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
             var itemSize = Unsafe.SizeOf<Foo>();
 
             Span<Foo> buffer = new Foo[ItemsBufferCount]; // alloc items buffer
-            var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
+            var rawBuffer = MemoryMarshal.Cast<Foo, byte>(buffer); // cast items buffer to bytes buffer (no copies)
 
             var bytesRead = stream.Read(rawBuffer);
             var sum = 0L;
@@ -60,14 +61,14 @@ namespace SpanSample
         }
 
         [Benchmark]
-        public long Sum_RawEnumerator()
+        public long RawEnumerator()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
             var itemSize = Unsafe.SizeOf<Foo>();
 
             Span<Foo> buffer = new Foo[ItemsBufferCount]; // alloc items buffer
-            var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
+            var rawBuffer = MemoryMarshal.Cast<Foo, byte>(buffer); // cast items buffer to bytes buffer (no copies)
 
             var bytesRead = stream.Read(rawBuffer);
             var sum = 0L;
@@ -82,15 +83,15 @@ namespace SpanSample
             return sum;
         }
 
-        [Benchmark(Baseline = true)]
-        public long Sum_RawSquareBrackets()
+        [Benchmark]
+        public long RawForIndexer()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
             var itemSize = Unsafe.SizeOf<Foo>();
 
             Span<Foo> buffer = new Foo[ItemsBufferCount]; // alloc items buffer
-            var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
+            var rawBuffer = MemoryMarshal.Cast<Foo, byte>(buffer); // cast items buffer to bytes buffer (no copies)
 
             var bytesRead = stream.Read(rawBuffer);
             var sum = 0L;
@@ -105,15 +106,15 @@ namespace SpanSample
             return sum;
         }
 
-        [Benchmark]
-        public long Sum_RawStackalloc()
+        [Benchmark(Baseline = true)]
+        public long RawStackalloc()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
             var itemSize = Unsafe.SizeOf<Foo>();
 
             Span<Foo> buffer = stackalloc Foo[ItemsBufferCount]; // alloc items buffer
-            var rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
+            var rawBuffer = MemoryMarshal.Cast<Foo, byte>(buffer); // cast items buffer to bytes buffer (no copies)
 
             var bytesRead = stream.Read(rawBuffer);
             var sum = 0L;
@@ -129,7 +130,7 @@ namespace SpanSample
         }
 
         [Benchmark]
-        public long Sum_RefEnumerable()
+        public long RefEnumerable()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -140,7 +141,7 @@ namespace SpanSample
         }
 
         [Benchmark]
-        public long Sum_Enumerable()
+        public long Enumerable()
         {
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -151,7 +152,7 @@ namespace SpanSample
         }
 
         [Benchmark]
-        public long Sum_NativeEnumerable()
+        public long NativeEnumerable()
         {
             var sum = 0L;
             foreach (var foo in new NativeEnumerable(ItemsCount, ItemsBufferCount))

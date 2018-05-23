@@ -132,9 +132,9 @@ namespace SpanSample
         [Benchmark]
         public int MethodCall_NativeOwnedMemory()
         {
-            using (var buffer = new NativeOwnedMemory<int>(BufferSize))
+            using (var buffer = new NativeMemoryManager<int>(BufferSize))
             {
-                return Sum(buffer.Span);
+                return Sum(buffer.Memory.Span);
             }
         }
     }

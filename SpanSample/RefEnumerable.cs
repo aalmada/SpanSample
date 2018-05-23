@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace SpanSample
 {
@@ -32,7 +33,7 @@ namespace SpanSample
             {
                 stream = enumerable.stream;
                 buffer = new Foo[enumerable.itemsBufferCount]; // alloc items buffer
-                rawBuffer = buffer.NonPortableCast<Foo, byte>(); // cast items buffer to bytes buffer (no copies)
+                rawBuffer = MemoryMarshal.Cast<Foo, byte>(buffer); // cast items buffer to bytes buffer (no copies)
                 lastBuffer = false;
                 loadedItems = 0;
                 currentItem = -1;

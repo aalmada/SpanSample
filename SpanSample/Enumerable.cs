@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace SpanSample
 {
@@ -57,7 +58,7 @@ namespace SpanSample
                     return false;
 
                 // get next buffer
-                var rawBuffer = buffer.Span.NonPortableCast<Foo, Byte>();
+                var rawBuffer = MemoryMarshal.Cast<Foo,byte>(buffer.Span);
                 var bytesRead = stream.Read(rawBuffer);
                 lastBuffer = bytesRead < rawBuffer.Length;
                 currentItem = 0;
