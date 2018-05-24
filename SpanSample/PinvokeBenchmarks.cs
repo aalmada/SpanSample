@@ -90,44 +90,25 @@ namespace SpanSample
 
         ////////////////////////////////////////////////////////////////////////
 
-        static unsafe int SumFixed(ReadOnlySpan<int> buffer)
+        static unsafe int Sum(ReadOnlySpan<int> span)
         {
-            fixed (int* ptr = &MemoryMarshal.GetReference(buffer))
+            fixed (int* ptr = &MemoryMarshal.GetReference(span))
             {
-                return Native.SumRef(Unsafe.AsRef<int>(ptr), (UIntPtr)buffer.Length);
+                return Native.SumRef(Unsafe.AsRef<int>(ptr), (UIntPtr)span.Length);
             }
         }
 
-        static int SumPin(Memory<int> buffer)
-        {
-            using (var handle = buffer.Pin())
-            {
-                return Native.SumRef(MemoryMarshal.GetReference(buffer.Span), (UIntPtr)buffer.Length);
-            }
-        }
-
-        static int SumPinned(ReadOnlySpan<int> buffer)
-        {
-            return Native.SumRef(MemoryMarshal.GetReference(buffer), (UIntPtr)buffer.Length);
-        }
-
         [Benchmark]
-        public int MethodCall_Array_Fixed()
+        public int MethodCall_Array()
         {
-            return SumFixed(new int[BufferSize]);
-        }
-
-        [Benchmark]
-        public int MethodCall_Array_Pin()
-        {
-            return SumPin(new int[BufferSize]);
+            return Sum(new int[BufferSize]);
         }
 
         [Benchmark]
         public unsafe int MethodCall_StackAlloc()
         {
-            ReadOnlySpan<int> buffer = stackalloc int[BufferSize];
-            return SumPinned(buffer);
+            ReadOnlySpan<int> span = stackalloc int[BufferSize];
+            return Sum(span);
         }
 
         [Benchmark]
@@ -139,7 +120,7 @@ namespace SpanSample
             {
                 buffer = Marshal.AllocHGlobal(size);
                 GC.AddMemoryPressure(size);
-                return SumPinned(new ReadOnlySpan<int>(buffer.ToPointer(), BufferSize));
+                return Sum(new ReadOnlySpan<int>(buffer.ToPointer(), BufferSize));
             }
             finally
             {
@@ -153,7 +134,7 @@ namespace SpanSample
         {
             using (var buffer = new NativeMemoryManager<int>(BufferSize))
             {
-                return SumPin(buffer.Memory);
+                return Sum(buffer.Memory.Span);
             }
         }
     }
