@@ -36,7 +36,7 @@ namespace System.Buffers
             }
         }
 
-        public override int Length => _length;
+        public int Length => _length;
 
         public bool IsRetained
         {
