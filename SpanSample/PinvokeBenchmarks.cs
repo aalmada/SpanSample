@@ -53,12 +53,12 @@ namespace SpanSample
         ////////////////////////////////////////////////////////////////////////
 
         [Benchmark]
-        public int Span_Array()
+        public unsafe int Span_Array()
         {
-            Memory<int> memory = new int[BufferSize];
-            using(var handle = memory.Pin())
+            ReadOnlySpan<int> span = new int[BufferSize];
+            fixed (int* ptr = &MemoryMarshal.GetReference(span))
             {
-                return Native.SumRef(MemoryMarshal.GetReference(memory.Span), (UIntPtr)memory.Length);
+                return Native.SumRef(Unsafe.AsRef<int>(ptr), (UIntPtr)span.Length);
             }
         }
 
